@@ -75,6 +75,7 @@ def build_faiss_index(
         if not pa.types.is_list(emb_data.type):
             emb_data = emb_data.cast(pa.string())
             emb_data = pa.compute.split_pattern(emb_data, ",")
+        emb_data = emb_data.values
         emb_data = emb_data.cast(pa.list_(pa.float32()), safe=False)
         embeddings.append(np.stack(emb_data.to_numpy(zero_copy_only=False)))
         if embedding_dim is None:

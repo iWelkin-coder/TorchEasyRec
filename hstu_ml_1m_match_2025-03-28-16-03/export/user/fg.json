@@ -1,0 +1,16 @@
+{
+    "features": [
+        {
+            "feature_type": "sequence_id_feature",
+            "feature_name": "historical_ids",
+            "default_value": "0",
+            "expression": "user:historical_ids",
+            "value_type": "string",
+            "need_prefix": false,
+            "sequence_delim": ";",
+            "sequence_length": 210,
+            "num_buckets": 3953,
+            "value_dim": 1
+        }
+    ]
+}

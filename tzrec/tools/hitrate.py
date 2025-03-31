@@ -242,6 +242,7 @@ if __name__ == "__main__":
     for i, data in enumerate(reader.to_batches(worker_id, num_workers)):
         request_id = data[args.request_id_field]
         gt_items = data[args.gt_items_field]
+        gt_items = gt_items.cast(pa.list_(pa.string()))
         if not pa.types.is_list(gt_items.type):
             gt_items = gt_items.cast(pa.string())
             gt_items = pa.compute.split_pattern(gt_items, ",")

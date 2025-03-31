@@ -1,0 +1,142 @@
+
+torch.fx._symbolic_trace.wrap("tzrec_modules_embedding__merge_list_of_jt_dict")
+torch.fx._symbolic_trace.wrap("tzrec_modules_embedding__int_item")
+torch.fx._symbolic_trace.wrap("tzrec_modules_embedding__merge_list_of_tensor_dict")
+torch.fx._symbolic_trace.wrap("tzrec_modules_embedding__update_dict_tensor")
+torch.fx._symbolic_trace.wrap("tzrec_modules_sequence__arange")
+
+def forward(self, data : typing_Dict[str,torch.Tensor], device : device = 'cpu') -> typing_Dict[str,torch.Tensor]:
+    device_1 = device
+    getitem = data['historical_ids.values']
+    getitem_1 = data['historical_ids.lengths'];  data = None
+    cat = torch.cat([getitem], dim = -1)
+    cat_1 = torch.cat([getitem_1], dim = -1)
+    size = getitem_1.size(0);  getitem_1 = None
+    numel = getitem.numel();  getitem = None
+    keyed_jagged_tensor = torchrec_sparse_jagged_tensor_KeyedJaggedTensor(keys = ['historical_ids'], values = cat, lengths = cat_1, weights = None, stride = size, length_per_key = [numel]);  cat = cat_1 = size = numel = None
+    to = keyed_jagged_tensor.to(device = device_1, non_blocking = True);  keyed_jagged_tensor = device_1 = None
+    to_dict = to.to_dict();  to = None
+    getitem_2 = to_dict['historical_ids'];  to_dict = None
+    values = getitem_2.values()
+    model_embedding_group_seq_emb_impls___neg___ec_list_0_embeddings_historical_ids_emb = getattr(self.model.embedding_group.seq_emb_impls.__NEG__.ec_list, "0").embeddings.historical_ids_emb(input = values);  values = None
+    float_1 = model_embedding_group_seq_emb_impls___neg___ec_list_0_embeddings_historical_ids_emb.float();  model_embedding_group_seq_emb_impls___neg___ec_list_0_embeddings_historical_ids_emb = None
+    lengths = getitem_2.lengths();  getitem_2 = None
+    jagged_tensor = torchrec_sparse_jagged_tensor_JaggedTensor(values = float_1, lengths = lengths, weights = None);  float_1 = lengths = None
+    _merge_list_of_jt_dict = tzrec_modules_embedding__merge_list_of_jt_dict([{'historical_ids': jagged_tensor}]);  jagged_tensor = None
+    getitem_3 = _merge_list_of_jt_dict['historical_ids'];  _merge_list_of_jt_dict = None
+    lengths_1 = getitem_3.lengths()
+    max_1 = torch.max(lengths_1)
+    _int_item = tzrec_modules_embedding__int_item(max_1);  max_1 = None
+    to_padded_dense = getitem_3.to_padded_dense(_int_item);  getitem_3 = _int_item = None
+    cat_2 = torch.cat([to_padded_dense], dim = 2);  to_padded_dense = None
+    _merge_list_of_tensor_dict = tzrec_modules_embedding__merge_list_of_tensor_dict([{'sequence.sequence_length': lengths_1, 'sequence.sequence': cat_2}]);  lengths_1 = cat_2 = None
+    _update_dict_tensor = tzrec_modules_embedding__update_dict_tensor(_merge_list_of_tensor_dict, {});  _merge_list_of_tensor_dict = None
+    getitem_4 = _update_dict_tensor['sequence.sequence']
+    getitem_5 = _update_dict_tensor['sequence.sequence_length'];  _update_dict_tensor = None
+    size_1 = getitem_4.size(1)
+    getattr_1 = getitem_4.device
+    _arange = tzrec_modules_sequence__arange(size_1, device = getattr_1);  size_1 = getattr_1 = None
+    unsqueeze = _arange.unsqueeze(0);  _arange = None
+    size_2 = getitem_4.size(0)
+    expand = unsqueeze.expand(size_2, -1);  unsqueeze = size_2 = None
+    mul = getitem_4 * 6.928203230275509
+    model_user_tower_seq_encoder_position_embed = self.model.user_tower.seq_encoder.position_embed(expand);  expand = None
+    add = mul + model_user_tower_seq_encoder_position_embed;  mul = model_user_tower_seq_encoder_position_embed = None
+    dropout = torch.nn.functional.dropout(add, p = 0.2, training = False, inplace = False);  add = None
+    size_3 = dropout.size(1)
+    getattr_2 = getitem_5.device
+    _arange_1 = tzrec_modules_sequence__arange(size_3, device = getattr_2);  size_3 = getattr_2 = None
+    unsqueeze_1 = _arange_1.unsqueeze(0);  _arange_1 = None
+    unsqueeze_2 = getitem_5.unsqueeze(1)
+    lt = unsqueeze_1 < unsqueeze_2;  unsqueeze_1 = unsqueeze_2 = None
+    unsqueeze_3 = lt.unsqueeze(-1);  lt = None
+    getattr_3 = getitem_4.dtype;  getitem_4 = None
+    to_1 = unsqueeze_3.to(getattr_3);  unsqueeze_3 = None
+    mul_1 = dropout * to_1;  dropout = to_1 = None
+    model_user_tower_seq_encoder__attn_mask = self.model.user_tower.seq_encoder._attn_mask
+    to_2 = model_user_tower_seq_encoder__attn_mask.to(getattr_3);  model_user_tower_seq_encoder__attn_mask = getattr_3 = None
+    sub = 1.0 - to_2;  to_2 = None
+    asynchronous_complete_cumsum = torch.ops.fbgemm.asynchronous_complete_cumsum(getitem_5)
+    dense_to_jagged = torch.ops.fbgemm.dense_to_jagged(mul_1, [asynchronous_complete_cumsum]);  mul_1 = None
+    getitem_6 = dense_to_jagged[0];  dense_to_jagged = None
+    size_4 = sub.size(-1);  size_4 = None
+    layer_norm = torch.nn.functional.layer_norm(getitem_6, [48], weight = None, bias = None, eps = 1e-06)
+    model_user_tower_seq_encoder__attention_layers_0__uvqk = getattr(self.model.user_tower.seq_encoder._attention_layers, "0")._uvqk
+    mm = torch.mm(layer_norm, model_user_tower_seq_encoder__attention_layers_0__uvqk);  layer_norm = model_user_tower_seq_encoder__attention_layers_0__uvqk = None
+    silu = torch.nn.functional.silu(mm, inplace = False);  mm = None
+    split = torch.functional.split(silu, [48, 48, 48, 48], dim = 1);  silu = None
+    getitem_7 = split[0]
+    getitem_8 = split[1]
+    getitem_9 = split[2]
+    getitem_10 = split[3];  split = None
+    size_5 = asynchronous_complete_cumsum.size(0)
+    sub_1 = size_5 - 1;  size_5 = sub_1 = None
+    size_6 = asynchronous_complete_cumsum.size(0)
+    sub_2 = size_6 - 1;  size_6 = None
+    size_7 = sub.size(-1)
+    jagged_to_padded_dense = torch.ops.fbgemm.jagged_to_padded_dense(values = getitem_9, offsets = [asynchronous_complete_cumsum], max_lengths = [size_7], padding_value = 0.0);  getitem_9 = None
+    jagged_to_padded_dense_1 = torch.ops.fbgemm.jagged_to_padded_dense(values = getitem_10, offsets = [asynchronous_complete_cumsum], max_lengths = [size_7], padding_value = 0.0);  getitem_10 = None
+    view = jagged_to_padded_dense.view(sub_2, size_7, 1, 48);  jagged_to_padded_dense = None
+    view_1 = jagged_to_padded_dense_1.view(sub_2, size_7, 1, 48);  jagged_to_padded_dense_1 = None
+    einsum = torch.functional.einsum('bnhd,bmhd->bhnm', view, view_1);  view = view_1 = None
+    silu_1 = torch.nn.functional.silu(einsum, inplace = False);  einsum = None
+    truediv = silu_1 / size_7;  silu_1 = None
+    unsqueeze_4 = sub.unsqueeze(0)
+    unsqueeze_5 = unsqueeze_4.unsqueeze(0);  unsqueeze_4 = None
+    mul_2 = truediv * unsqueeze_5;  truediv = unsqueeze_5 = None
+    jagged_to_padded_dense_2 = torch.ops.fbgemm.jagged_to_padded_dense(getitem_8, [asynchronous_complete_cumsum], [size_7]);  getitem_8 = None
+    reshape = jagged_to_padded_dense_2.reshape(sub_2, size_7, 1, 48);  jagged_to_padded_dense_2 = None
+    einsum_1 = torch.functional.einsum('bhnm,bmhd->bnhd', mul_2, reshape);  mul_2 = reshape = None
+    reshape_1 = einsum_1.reshape(sub_2, size_7, 48);  einsum_1 = sub_2 = size_7 = None
+    dense_to_jagged_1 = torch.ops.fbgemm.dense_to_jagged(reshape_1, [asynchronous_complete_cumsum]);  reshape_1 = None
+    getitem_11 = dense_to_jagged_1[0];  dense_to_jagged_1 = None
+    layer_norm_1 = torch.nn.functional.layer_norm(getitem_11, [48], weight = None, bias = None, eps = 1e-06);  getitem_11 = None
+    mul_3 = getitem_7 * layer_norm_1;  getitem_7 = layer_norm_1 = None
+    dropout_1 = torch.nn.functional.dropout(mul_3, p = 0.2, training = False, inplace = False);  mul_3 = None
+    model_user_tower_seq_encoder__attention_layers_0__o = getattr(self.model.user_tower.seq_encoder._attention_layers, "0")._o(dropout_1);  dropout_1 = None
+    add_1 = model_user_tower_seq_encoder__attention_layers_0__o + getitem_6;  model_user_tower_seq_encoder__attention_layers_0__o = getitem_6 = None
+    size_8 = sub.size(-1);  size_8 = None
+    layer_norm_2 = torch.nn.functional.layer_norm(add_1, [48], weight = None, bias = None, eps = 1e-06)
+    model_user_tower_seq_encoder__attention_layers_1__uvqk = getattr(self.model.user_tower.seq_encoder._attention_layers, "1")._uvqk
+    mm_1 = torch.mm(layer_norm_2, model_user_tower_seq_encoder__attention_layers_1__uvqk);  layer_norm_2 = model_user_tower_seq_encoder__attention_layers_1__uvqk = None
+    silu_2 = torch.nn.functional.silu(mm_1, inplace = False);  mm_1 = None
+    split_1 = torch.functional.split(silu_2, [48, 48, 48, 48], dim = 1);  silu_2 = None
+    getitem_12 = split_1[0]
+    getitem_13 = split_1[1]
+    getitem_14 = split_1[2]
+    getitem_15 = split_1[3];  split_1 = None
+    size_9 = asynchronous_complete_cumsum.size(0)
+    sub_3 = size_9 - 1;  size_9 = sub_3 = None
+    size_10 = asynchronous_complete_cumsum.size(0)
+    sub_4 = size_10 - 1;  size_10 = None
+    size_11 = sub.size(-1)
+    jagged_to_padded_dense_3 = torch.ops.fbgemm.jagged_to_padded_dense(values = getitem_14, offsets = [asynchronous_complete_cumsum], max_lengths = [size_11], padding_value = 0.0);  getitem_14 = None
+    jagged_to_padded_dense_4 = torch.ops.fbgemm.jagged_to_padded_dense(values = getitem_15, offsets = [asynchronous_complete_cumsum], max_lengths = [size_11], padding_value = 0.0);  getitem_15 = None
+    view_2 = jagged_to_padded_dense_3.view(sub_4, size_11, 1, 48);  jagged_to_padded_dense_3 = None
+    view_3 = jagged_to_padded_dense_4.view(sub_4, size_11, 1, 48);  jagged_to_padded_dense_4 = None
+    einsum_2 = torch.functional.einsum('bnhd,bmhd->bhnm', view_2, view_3);  view_2 = view_3 = None
+    silu_3 = torch.nn.functional.silu(einsum_2, inplace = False);  einsum_2 = None
+    truediv_1 = silu_3 / size_11;  silu_3 = None
+    unsqueeze_6 = sub.unsqueeze(0);  sub = None
+    unsqueeze_7 = unsqueeze_6.unsqueeze(0);  unsqueeze_6 = None
+    mul_4 = truediv_1 * unsqueeze_7;  truediv_1 = unsqueeze_7 = None
+    jagged_to_padded_dense_5 = torch.ops.fbgemm.jagged_to_padded_dense(getitem_13, [asynchronous_complete_cumsum], [size_11]);  getitem_13 = None
+    reshape_2 = jagged_to_padded_dense_5.reshape(sub_4, size_11, 1, 48);  jagged_to_padded_dense_5 = None
+    einsum_3 = torch.functional.einsum('bhnm,bmhd->bnhd', mul_4, reshape_2);  mul_4 = reshape_2 = None
+    reshape_3 = einsum_3.reshape(sub_4, size_11, 48);  einsum_3 = sub_4 = size_11 = None
+    dense_to_jagged_2 = torch.ops.fbgemm.dense_to_jagged(reshape_3, [asynchronous_complete_cumsum]);  reshape_3 = asynchronous_complete_cumsum = None
+    getitem_16 = dense_to_jagged_2[0];  dense_to_jagged_2 = None
+    layer_norm_3 = torch.nn.functional.layer_norm(getitem_16, [48], weight = None, bias = None, eps = 1e-06);  getitem_16 = None
+    mul_5 = getitem_12 * layer_norm_3;  getitem_12 = layer_norm_3 = None
+    dropout_2 = torch.nn.functional.dropout(mul_5, p = 0.2, training = False, inplace = False);  mul_5 = None
+    model_user_tower_seq_encoder__attention_layers_1__o = getattr(self.model.user_tower.seq_encoder._attention_layers, "1")._o(dropout_2);  dropout_2 = None
+    add_2 = model_user_tower_seq_encoder__attention_layers_1__o + add_1;  model_user_tower_seq_encoder__attention_layers_1__o = add_1 = None
+    getitem_17 = add_2[(Ellipsis, slice(None, 48, None))];  add_2 = None
+    linalg_norm = torch._C._linalg.linalg_norm(getitem_17, ord = None, dim = -1, keepdim = True)
+    clamp = torch.clamp(linalg_norm, min = 1e-06);  linalg_norm = None
+    truediv_2 = getitem_17 / clamp;  getitem_17 = clamp = None
+    asynchronous_complete_cumsum_1 = torch.ops.fbgemm.asynchronous_complete_cumsum(getitem_5);  getitem_5 = None
+    getitem_18 = asynchronous_complete_cumsum_1[slice(1, None, None)];  asynchronous_complete_cumsum_1 = None
+    sub_5 = getitem_18 - 1;  getitem_18 = None
+    getitem_19 = truediv_2[sub_5];  truediv_2 = sub_5 = None
+    return {'user_tower_emb': getitem_19}

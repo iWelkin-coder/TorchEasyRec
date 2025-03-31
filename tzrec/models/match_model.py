@@ -372,7 +372,5 @@ class TowerWoEGWrapper(nn.Module):
         """
         grouped_features = self.embedding_group(batch)
         return {
-            f"{self._tower_name}_emb": getattr(self, self._tower_name)(
-                grouped_features[self._group_name]
-            )
+            f"{self._tower_name}_emb": getattr(self, self._tower_name)(grouped_features)
         }

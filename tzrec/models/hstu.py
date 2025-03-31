@@ -112,7 +112,7 @@ class HSTUMatchItemTower(MatchTowerWoEG):
             torch.Tensor: The output tensor from the tower
         """
         output = grouped_features[f"{self._group_name}.sequence"]
-        output = F.normalize(output, p=2.0, dim=1, eps=1e-6)
+        output = F.normalize(output, p=2.0, dim=-1, eps=1e-6)
 
         return output
 
@@ -166,6 +166,18 @@ class HSTUMatch(MatchModel):
         )
 
         self.seq_tower_input = self._model_config.hstu_tower.input
+        for name, params in self.named_parameters():
+            if not (("position" in name) or ("embeddings" in name)):
+                print(f"Skipping init for {name}")
+                continue
+            try:
+                if "position" in name:
+                    torch.nn.init.xavier_normal_(params.data)
+                elif "embeddings" in name:
+                    self.truncated_normal(params.data, 0, 0.02)
+            except Exception as e:
+                print(f"Failed to initialize {name}: {params.data.size()} params")
+                print(e)
 
     def predict(self, batch: Batch) -> Dict[str, Tensor]:
         """Forward the model.
@@ -229,3 +241,16 @@ class HSTUMatch(MatchModel):
                 neg_item_emb = neg_item_emb.view(batch_size, num_neg_per_user, -1)
                 neg_ui_sim = torch.sum(user_emb.unsqueeze(1) * neg_item_emb, dim=-1)
             return torch.cat([pos_ui_sim, neg_ui_sim], dim=-1)
+
+    def truncated_normal(
+        self, x: torch.Tensor, mean: float, std: float
+    ) -> torch.Tensor:
+        """Truncated normal initialization."""
+        with torch.no_grad():
+            size = x.shape
+            tmp = x.new_empty(size + (4,)).normal_()
+            valid = (tmp < 2) & (tmp > -2)
+            ind = valid.max(-1, keepdim=True)[1]
+            x.data.copy_(tmp.gather(-1, ind).squeeze(-1))
+            x.data.mul_(std).add_(mean)
+            return x

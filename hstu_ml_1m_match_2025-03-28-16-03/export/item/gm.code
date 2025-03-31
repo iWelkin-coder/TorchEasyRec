@@ -1,0 +1,35 @@
+
+torch.fx._symbolic_trace.wrap("tzrec_modules_embedding__merge_list_of_jt_dict")
+torch.fx._symbolic_trace.wrap("tzrec_modules_embedding__int_item")
+torch.fx._symbolic_trace.wrap("tzrec_modules_embedding__merge_list_of_tensor_dict")
+torch.fx._symbolic_trace.wrap("tzrec_modules_embedding__update_dict_tensor")
+
+def forward(self, data : typing_Dict[str,torch.Tensor], device : device = 'cpu') -> typing_Dict[str,torch.Tensor]:
+    device_1 = device
+    getitem = data['historical_ids.values']
+    getitem_1 = data['historical_ids.lengths'];  data = None
+    cat = torch.cat([getitem], dim = -1)
+    cat_1 = torch.cat([getitem_1], dim = -1)
+    size = getitem_1.size(0);  getitem_1 = None
+    numel = getitem.numel();  getitem = None
+    keyed_jagged_tensor = torchrec_sparse_jagged_tensor_KeyedJaggedTensor(keys = ['historical_ids'], values = cat, lengths = cat_1, weights = None, stride = size, length_per_key = [numel]);  cat = cat_1 = size = numel = None
+    to = keyed_jagged_tensor.to(device = device_1, non_blocking = True);  keyed_jagged_tensor = device_1 = None
+    to_dict = to.to_dict();  to = None
+    getitem_2 = to_dict['historical_ids'];  to_dict = None
+    values = getitem_2.values()
+    model_embedding_group_seq_emb_impls___neg___ec_list_0_embeddings_historical_ids_emb = getattr(self.model.embedding_group.seq_emb_impls.__NEG__.ec_list, "0").embeddings.historical_ids_emb(input = values);  values = None
+    float_1 = model_embedding_group_seq_emb_impls___neg___ec_list_0_embeddings_historical_ids_emb.float();  model_embedding_group_seq_emb_impls___neg___ec_list_0_embeddings_historical_ids_emb = None
+    lengths = getitem_2.lengths();  getitem_2 = None
+    jagged_tensor = torchrec_sparse_jagged_tensor_JaggedTensor(values = float_1, lengths = lengths, weights = None);  float_1 = lengths = None
+    _merge_list_of_jt_dict = tzrec_modules_embedding__merge_list_of_jt_dict([{'historical_ids': jagged_tensor}]);  jagged_tensor = None
+    getitem_3 = _merge_list_of_jt_dict['historical_ids'];  _merge_list_of_jt_dict = None
+    lengths_1 = getitem_3.lengths()
+    max_1 = torch.max(lengths_1)
+    _int_item = tzrec_modules_embedding__int_item(max_1);  max_1 = None
+    to_padded_dense = getitem_3.to_padded_dense(_int_item);  getitem_3 = _int_item = None
+    cat_2 = torch.cat([to_padded_dense], dim = 2);  to_padded_dense = None
+    _merge_list_of_tensor_dict = tzrec_modules_embedding__merge_list_of_tensor_dict([{'sequence.sequence_length': lengths_1, 'sequence.sequence': cat_2}]);  lengths_1 = cat_2 = None
+    _update_dict_tensor = tzrec_modules_embedding__update_dict_tensor(_merge_list_of_tensor_dict, {});  _merge_list_of_tensor_dict = None
+    getitem_4 = _update_dict_tensor['sequence.sequence'];  _update_dict_tensor = None
+    normalize = torch.nn.functional.normalize(getitem_4, p = 2.0, dim = -1, eps = 1e-06, out = None);  getitem_4 = None
+    return {'item_tower_emb': normalize}
